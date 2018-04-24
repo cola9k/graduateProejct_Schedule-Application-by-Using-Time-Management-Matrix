@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript">
+        google.charts.load("current", {
+            packages: ["corechart"]
+        });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('number');
+            data.addColumn('number');
+            var dd = new google.visualization.DataTable();
+            dd.addColumn('number');
+            dd.addColumn('number');
+            //별원으로 그리던 코드
+            // var radius = 100;
+            // for (var i = 0; i < 6.28; i += 0.1) {
+            //     data.addRow([radius * Math.cos(i), radius * Math.sin(i)]);
+            // }
+            // data.addRow([0.1,-0.5]);
+            // Our central point, which will jiggle.
+            // data.addRow([0, 0]);
+            // data.addRow([0.5,0.1]);
+            // data.addRow([-0.5,-0.1]);
+            var options = {
+                legend: 'none',
+                colors: ['#F06464'],
+                pointShape: 'circle',
+                pointSize: 15,
+                animation: {
+                    duration: 200,
+                    easing: 'inAndOut',
+                }
+            };
+            // 표 틀 기준 구성
+            var construct = {
+                legend: 'none',
+                colors: ['#CCCCCC'],
+                // opacity: 1.0,
+                pointShape: 'circle',
+                pointSize: 5,
+                animation: {
+                    duration: 200,
+                    easing: 'inAndOut',
+                }
+            }
+
+            var chart = new google.visualization.ScatterChart(document.getElementById('animatedshapes_div'));
+
+            var cc = new google.visualization.ScatterChart(document.getElementById('animatedshapes_div'));
+
+            // Start the animation by listening to the first 'ready' event.
+            google.visualization.events.addOneTimeListener(chart, 'ready', randomWalk);
+
+            // Control all other animations by listening to the 'animationfinish' event.
+            // google.visualization.events.addListener(chart, 'animationfinish', randomWalk);
+
+            // 틀 만들기
+            dd.addRow([-1, -1]);
+            dd.addRow([-1, 1]);
+            dd.addRow([1, -1]);
+            dd.addRow([1, 1]);
+            cc.draw(dd, construct);
+
+            chart.draw(data, options);
+
+            var obj = new Array();
+            var sum_obj = new Array(); // 날자 문자열
+            var im = new Array();
+
+            function randomWalk() {
+                console.log("Function Enter");
+                $.ajax({
+                    type: 'post',
+                    url: 'https://cola9k-graduatedev-cola9k.c9users.io/things_select',
+                    // dataType: 'html',
+                    success: function(data) {
+                        var jsonobj = new Array();
+                        for (var a = 0; a < data.length; a++) {
+                            // 날짜 집어 넣기
+                            var split_data = data[a].time.split('-');
+
+                            console.log("Split_data:" + split_data);
+                            // 날짜 문자열 통합
+                            sum_obj[a] = split_data[0] + split_data[1] + split_data[2];
+                            console.log("Sum_obj[a]:" + sum_obj[a]);
+                        }
+                        jsonfunc(data);
+                    }
+                });
+            }
+
+            /* 테스트 코드 */
+            // 우선순위 설정
+            // function orderTime(time) {
+            //     var dateValue = new Date();
+            //     var month = "";
+            //     var date = "";
+            //     var today = "";
+
+            //     // 오늘 일자를 측정
+            //     if ((dateValue.getMonth() + 1) < 10) {
+            //         month = "0" + (dateValue.getMonth() + 1);
+            //         console.log("MONTH (if):" + month);
+
+            //         today = dateValue.getFullYear().toString() + month + dateValue.getDate().toString();
+            //         console.log("TODAY (if):" + today);
+            //     }
+            //     else {
+            //         today = dateValue.getFullYear().toString() + (dateValue.getMonth() + 1).toString() + dateValue.getDate().toString();
+            //         console.log("TODAY (else):" + today);
+            //     }
+
+
+            //     if ((dateValue.getDate()) < 10) {
+            //         date = "0" + dateValue.getDate();
+            //         console.log("DATE (if):" + date);
+
+            //         today = dateValue.getFullYear().toString() + (dateValue.getMonth() + 1).toString() + date;
+            //         console.log("DATE today(if):" + today);
+            //     }
+            //     else {
+            //         today = dateValue.getFullYear().toString() + (dateValue.getMonth() + 1).toString() + dateValue.getDate();
+            //         console.log("DATE today(else):" + today);
+            //     }
+
+            //     console.log("날짜:" + today);
+            //     console.log("TIME:" + time);
+            //     console.log("month:" + (dateValue.getMonth() + 1));
+            //     var t_month = (dateValue.getMonth() + 1);
+            //     var t_date = (dateValue.getDate());
+            //     var sub_month = time.substring(4, 6);
+            //     var sub_date = time.substring(7, 9);
+
+            //     function date_func(t_date) {
+            //         if ((t_date >= 1) && (t_date <= 8)) {
+            //             return -1.0;
+            //         }
+            //         else if ((t_date >= 9) && (t_date <= 16)) {
+            //             return 0.5;
+            //         }
+            //         else if ((t_date >= 17) && (t_date <= 24)) {
+            //             return -0.5;
+            //         }
+            //         else if ((t_date >= 25) && (t_date <= 31)) {
+            //             return 1.0;
+            //         }
+            //     }
+            //     console.log("지금 년도:" + dateValue.getFullYear() + "," + time.substring(0, 4));
+            //     // 연도 비교
+            //     if (dateValue.getFullYear() < time.substring(0, 4)) {
+            //         return 0.5;
+            //     }
+            //     console.log("절대값:" + Math.abs(sub_month - t_month));
+            //     if ((sub_month - t_month) == 0) {
+            //         console.log("**********1번 time:" + time);
+            //         return date_func(sub_date);
+            //     }
+            //     else if ((sub_month - t_month) <= 2 && (sub_month - t_month) >= 1) {
+            //         console.log("**********2번 time:" + time);
+            //         return date_func(sub_date);
+            //     }
+            //     else if ((sub_month - t_month) <= 5 && (sub_month - t_month) >= 3) {
+            //         console.log("**********3번 time:" + time);
+            //         return date_func(sub_date);
+            //     }
+            //     else if ((sub_month - t_month) >= 6) {
+            //         console.log("**********4번 time:" + time);
+            //         return date_func(sub_date);
+            //     }
+            //     else if (time < today) {
+            //         return;
+            //     }
+            //     // 최종 찍는 FUNCTION
+            //     function jsonfunc(js) {
+            //         var last_arr = new Array();
+            //         var sum_arr = new Array();
+            //         for (var i = 0; i < js.length; i++) {
+            //             console.log(js[i]);
+            //             var split_data = js[i].time.split('-');
+            //             console.log("for문:" + split_data);
+            //             sum_arr[i] = split_data[0] + split_data[1] + split_data[2]; //날짜 합쳐서 넣기
+            //             console.log("sum_arr[i]:" + sum_arr[i]);
+            //             last_arr[i] = js[i].importance + sum_arr[i];
+            //         }
+
+            //         // 그래프 점찍기
+            //         for (var j = 0; j < js.length; j++) {
+            //             var impo = last_arr[j].substring(0, 1);
+            //             console.log("importance:" + impo);
+            //             var time = last_arr[j].substring(1);
+            //             var choice;
+            //             if (impo == 1) {
+            //                 choice = orderTime(time);
+            //                 console.log("choice:" + choice);
+            //                 data.addRow([choice, 1.0]);
+            //                 chart.draw(data, options);
+            //             }
+            //             else if (impo == 2) {
+            //                 choice = orderTime(time);
+            //                 console.log("choice:" + choice);
+            //                 data.addRow([choice, 0.5]);
+            //                 chart.draw(data, options);
+            //             }
+            //             else if (impo == 3) {
+            //                 choice = orderTime(time);
+            //                 console.log("choice:" + choice);
+            //                 data.addRow([choice, -0.5]);
+            //                 chart.draw(data, options);
+            //             }
+            //             else if (impo == 4) {
+            //                 choice = orderTime(time);
+            //                 console.log("choice:" + choice);
+            //                 data.addRow([choice, -1.0]);
+            //                 chart.draw(data, options);
+            //             }
+            //         }
+            //     }
+            // }
+
+
+
+            /* 여기 까지*/
+
+            // 사용 코드
+            // 우선순위 설정
+            function orderTime(time) {
+                var dateValue = new Date();
+                var month = "";
+                var date = "";
+                var today = "";
+                if ((dateValue.getMonth() + 1) < 10) {
+                    month = "0" + (dateValue.getMonth() + 1);
+                    console.log("MONTH:" + month);
+                    today = dateValue.getFullYear().toString() + month + dateValue.getDate().toString();
+                }
+                else {
+                    today = dateValue.getFullYear().toString() + (dateValue.getMonth() + 1).toString() + dateValue.getDate().toString();
+                }
+
+                if ((dateValue.getDate()) < 10) {
+                    date = "0" + dateValue.getDate();
+                    today = dateValue.getFullYear().toString() + (dateValue.getMonth() + 1).toString() + date;
+                }
+                else {
+                    today = dateValue.getFullYear().toString() + (dateValue.getMonth() + 1).toString() + dateValue.getDate();
+                }
+
+                console.log("날짜:" + today);
+                console.log("TIME:" + time);
+                // if (time >= "20170101" && time <= "20170331") {
+                //     console.log("**********1번");
+                //     return choice = -1.0;
+                // }
+                // else if (time >= "20170401" && time <= "20170630") {
+                //     console.log("**********2번");
+                //     return choice = -0.5;
+                // }
+                // else if (time >= "20170601" && time <= "20170931") {
+                //     console.log("**********3번");
+                //     return choice = 0.5;
+                // }
+                // else if (time >= "20171010" && time <= "201701231") {
+                //     console.log("**********4번");
+                //     return choice = 1.0;
+                // }
+                // else if (time < today) {
+                //     return;
+                // }
+                if (time >= "20180101" && time <= "20180331") {
+                    console.log("**********1번");
+                    return choice = -1.0;
+                }
+                else if (time >= "20180401" && time <= "20180630") {
+                    console.log("**********2번");
+                    return choice = -0.5;
+                }
+                else if (time >= "20180601" && time <= "20180931") {
+                    console.log("**********3번");
+                    return choice = 0.5;
+                }
+                else if (time >= "20181010" && time <= "201801231") {
+                    console.log("**********4번");
+                    return choice = 1.0;
+                }
+                else if (time < today) {
+                    return;
+                }
+            }
+
+            // 최종 찍는 FUNCTION
+            function jsonfunc(js) {
+                var last_arr = new Array();
+
+                for (var i = 0; i < js.length; i++) {
+                    console.log(js[i]);
+                    var split_data = js[i].time.split('-');
+                    sum_obj[i] = split_data[0] + split_data[1] + split_data[2]; //날짜 합쳐서 넣기
+                    last_arr[i] = js[i].importance + sum_obj[i];
+                }
+
+                // 그래프 점찍기
+                for (var j = 0; j < js.length; j++) {
+                    var impo = last_arr[j].substring(0, 1);
+                    var time = last_arr[j].substring(1);
+                    var choice;
+                    if (impo == 1) {
+                        choice = orderTime(time);
+                        data.addRow([choice, 1.0]);
+                        console.log("choice:"+choice+", data:"+data+", options:"+options);
+                        chart.draw(data, options);
+                    }
+                    else if (impo == 2) {
+                        choice = orderTime(time);
+                        data.addRow([choice, 0.5]);
+                        console.log("choice:"+choice+", data:"+data+", options:"+options);
+                        chart.draw(data, options);
+                    }
+                    else if (impo == 3) {
+                        choice = orderTime(time);
+                        data.addRow([choice, -0.5]);
+                        console.log("choice:"+choice+", data:"+data+", options:"+options);
+                        chart.draw(data, options);
+                    }
+                    else if (impo == 4) {
+                        choice = orderTime(time);
+                        data.addRow([choice, -1.0]);
+                        console.log("choice:"+choice+", data:"+data+", options:"+options);
+                        chart.draw(data, options);
+                    }
+                }
+            }
+            
+        }
+    </script>
+</head>
+
+<body>
+    <h1 style="color:gray; font-size:12pt; font-weight:bold;">매트릭스 그래프</h1>
+    <hr>
+    <div id="animatedshapes_div" style="width: 300px; height:300px;"></div>
+    <br>
+    <div id="data_div"></div>
+    <hr>
+    <h3 style="color:#008C8C; font-size:11pt;">X축:&nbsp;&nbsp; <span style="color:red; font-size:10pt; font-weight:bold;">-0.1 ~ 0.0 : 급합</span> &nbsp;&nbsp; <span style="color:blue; font-size:10pt; font-weight:bold;">0.0 ~ 1.0 : 여유로움</span></h3>
+
+    <h3 style="color:#008C8C; font-size:11pt;">Y축:&nbsp;&nbsp; <span style="color:orange; font-size:10pt; font-weight:bold;">1.0 ~ 0.0 : 중요함</span> &nbsp; <span style="color:green; font-size:10pt; font-weight:bold;">0.0 ~ -1.0 : 덜중요함</span></h3>
+
+</body>
+
+</html>
